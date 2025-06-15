@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Request
 from app.core.verify_signature import verify_signature
+from app.api import auth
 
 router = APIRouter()
+router.include_router(auth.router, prefix="/auth", tags=["auth"])
 
 @router.post("/interactions")
 async def interactions(request: Request):
@@ -15,3 +17,4 @@ async def interactions(request: Request):
 
     # Handle other interaction types here
     return {"type": 4, "data": {"content": "Hello from FastAPI!"}}
+

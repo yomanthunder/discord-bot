@@ -4,3 +4,4 @@ pydantic
 python-dotenv
 pynacl
 httpx
+pydantic-settings
