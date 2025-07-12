@@ -5,3 +5,5 @@ python-dotenv
 pynacl
 httpx
 pydantic-settings
+redis
+loguru

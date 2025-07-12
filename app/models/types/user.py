@@ -8,9 +8,10 @@ from .snowflake import Snowflake
 
 
 class UserSession(BaseModel):
-    user_id: str
+    user_id: Snowflake
     username: str
-    avatar: str
+    global_name: Optional[str] = Field(default=None)
+    # avatar: str
     is_authenticated: bool = False
     
 class AvatarDecorationData(BaseModel):

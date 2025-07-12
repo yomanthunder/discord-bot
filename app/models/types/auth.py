@@ -1,5 +1,12 @@
 from pydantic import BaseModel
 
+class OauthToken(BaseModel):
+    access_token: str
+    token_type: str
+    expires_at: int
+    refresh_token: str
+    scope: str
+
 class CodePayload(BaseModel):
     code: str
 

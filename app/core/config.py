@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     DISCORD_API_VERSION: str = "v10"
     DISCORD_API_BASE_URL: str = "https://discord.com/api/v10"
     ENVIRONMENT: str = "development"
+    REDIS_HOST: str
+    REDIS_PORT: int
 
     class Config:
         env_file = ".env"
