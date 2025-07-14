@@ -89,28 +89,28 @@ async def exchange_code(payload:CodePayload):
     
     return {"session_token": session_token, "user_id": user_data["id"]}
 
-# @router.post("/refresh")
-# async def refresh_token(user_id: str):
-#     refresh_token = get_refresh_token(user_id)
-#     data = {
-#         "client_id": settings.DISCORD_CLIENT_ID,
-#         "client_secret": settings.DISCORD_CLIENT_SECRET,
-#         "grant_type": "refresh_token",
-#         "refresh_token": refresh_token
+@router.post("/refresh")
+async def refresh_token(user_id: str):
+    refresh_token = get_refresh_token(user_id)
+    data = {
+        "client_id": settings.DISCORD_CLIENT_ID,
+        "client_secret": settings.DISCORD_CLIENT_SECRET,
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token
 
-#     }
-#     headers = {
-#         'Content-Type': 'application/x-www-form-urlencoded'
-#     }
-#     async with httpx.AsyncClient() as client:
-#         response = await client.post("https://discord.com/api/oauth2/token", data=data, headers=headers)
-#     if response.status_code != 200:
-#         raise HTTPException(status_code=400, detail="Token exchange failed")
+    }
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.post("https://discord.com/api/oauth2/token", data=data, headers=headers)
+    if response.status_code != 200:
+        raise HTTPException(status_code=400, detail="Token exchange failed")
     
-#     token_data = response.json
-#     await save_tokens(token_data,user_id="shrish")
+    token_data = response.json
+    await save_tokens(token_data,user_id="shrish")
 
-#     return token_data
+    return token_data
 
 
 # SECTION: Bot Authentication Features

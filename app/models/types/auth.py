@@ -1,4 +1,19 @@
-from pydantic import BaseModel
+from typing import Optional, List
+from pydantic import BaseModel, Field
+from .snowflake import Snowflake
+
+class CodePayload(BaseModel):
+    code: str
+
+class RefreshPayload(BaseModel):
+    refresh_token:str
+
+class Session(BaseModel):
+    user_id: Snowflake
+    username: str
+    global_name: Optional[str] = Field(default=None)
+    # avatar: str
+    is_authenticated: bool = False
 
 class OauthToken(BaseModel):
     access_token: str
@@ -6,12 +21,6 @@ class OauthToken(BaseModel):
     expires_at: int
     refresh_token: str
     scope: str
-
-class CodePayload(BaseModel):
-    code: str
-
-class RefreshPayload(BaseModel):
-    refresh_token:str
 
 class TokenResponse(BaseModel):
     access_token: str
