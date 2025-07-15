@@ -1,3 +1,5 @@
-class AuthenticationError(Exception):
-    print("Authentication error occurred")
-    pass
+# Custom exceptions  
+
+# class AuthenticationError(Exception):
+#     print("Authentication error occurred")
+#     pass

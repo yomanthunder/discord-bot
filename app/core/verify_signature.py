@@ -7,7 +7,7 @@ from .config import settings
 
 load_dotenv()
 
-PUBLIC_KEY = settings.DISCORD_PUBLIC_KEY
+PUBLIC_KEY = settings.discord.PUBLIC_KEY
 
 def verify_signature(request: Request, body: bytes):
     signature = request.headers.get("X-Signature-Ed25519")

@@ -1,14 +1,11 @@
-from typing import Literal, Optional, TypedDict
-from typing_extensions import NotRequired
+from typing import Literal, Optional
 from pydantic import BaseModel, Field
-from datetime import datetime, timedelta
-
 from .snowflake import Snowflake
 
 
 
 class UserSession(BaseModel):
-    user_id: Snowflake
+    user_id: str
     username: str
     global_name: Optional[str] = Field(default=None)
     # avatar: str

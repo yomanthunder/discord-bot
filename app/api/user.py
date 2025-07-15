@@ -1,70 +1,60 @@
-import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from app.core.config import settings
-from app.services.token_store import get_access_token,get_valid_access_token
-from app.services.token_store import save_user
+from app.services.auth_service import AuthService
+from app.services.session_service import SessionService
+from app.services.user_service import UserService
 router = APIRouter()
 
 # Writing api endpoints for getting User data and guilds
 class UserRequest(BaseModel):
-    user_id: str
+    session_token: str
+def get_auth_service() -> AuthService:
+    return AuthService()
+def get_session_service() -> SessionService:
+    return SessionService()
+def get_user_service() -> UserService:
+    return UserService()
 
 @router.post("/")
-async def get_user_data(request: UserRequest):
-    user_id = request.user_id
-    token = await get_valid_access_token(user_id)
+async def get_user_data(
+    request: UserRequest,
+    session_service: SessionService = Depends(get_session_service),
+    user_service: UserService = Depends(get_user_service)
+    ):
+    if not request.session_token:
+        raise HTTPException(status_code=400, detail="Session token is required")
+    
+    session = await session_service.get_session(request.session_token)
+    if not session:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    user_id = session.user_id # type: ignore
+    token = await session_service.get_token_from_session(request.session_token)
     if not token:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    headers={
-        "Authorization": f"Bearer {token.access_token}" # type: ignore
-    }
-    try:
-        async with httpx.AsyncClient() as client:
-            user_response = await client.get(
-                f"{settings.DISCORD_API_BASE_URL}/users/@me",
-                headers=headers
-            )
-        if user_response.status_code != 200:
-            print(f"Discord API Error: {user_response.status_code}")
-            print(f"Response: {user_response.text}")
-            raise HTTPException(
-                status_code=user_response.status_code, 
-                detail=f"Discord API error: {user_response.text}"
-            )
-    except httpx.RequestError as e:
-        raise HTTPException(status_code=500, detail=f"Request error: {str(e)}")
-    
-    try:
-        # save user in redis if it doesn't exist
-        await save_user(user_id=user_id, user_data=user_response.json())
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error saving user data: {str(e)}")
-
-    user_data = user_response.json()
+    user_data = await user_service.get_user_data(token.access_token)  # type: ignore
+    if not user_data:
+        raise HTTPException(status_code=404, detail="User data not found")
+    await user_service.save_user_data(user_id=user_id,user_data=user_data)
     return user_data
+    
 
 @router.post("/guilds")
-async def get_user_guilds(request: UserRequest):
-    user_id = request.user_id
-    token = await get_valid_access_token(user_id)
+async def get_user_guilds(
+    request: UserRequest,
+    session_service: SessionService = Depends(get_session_service),
+    user_service: UserService = Depends(get_user_service)
+    ):
+
+    if not request.session_token:
+        raise HTTPException(status_code=400, detail="Session token is required")
+    
+    session = await session_service.get_session(request.session_token)
+    print(f"Session: {session}")
+    if not session:
+        raise HTTPException(status_code=401, detail="Unauthorized session")
+    user_id = session.user_id  
+    
+    token = await session_service.get_token_from_session(request.session_token)
     if not token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    headers={
-        "Authorization": f"Bearer {token.access_token}"  # type: ignore
-    }   
-    async with httpx.AsyncClient() as client:
-        guilds_response = await client.get(
-            f"{settings.DISCORD_API_BASE_URL}/users/@me/guilds",
-            headers=headers
-        )
-    if guilds_response.status_code != 200:
-        raise HTTPException(status_code=400, detail="Failed to fetch user guilds")      
-    guilds_data = guilds_response.json()
-    filtered_guilds = [guild for guild in guilds_data if guild.get("owner", False)]
-    if not filtered_guilds:
-        raise HTTPException(status_code=404, detail="No guilds found for the user")
-    
-    return filtered_guilds
+        raise HTTPException(status_code=401, detail="Unauthorized session")
+    return await user_service.get_user_guilds(user_id, token)  

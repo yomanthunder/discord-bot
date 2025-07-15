@@ -1,15 +1,15 @@
-from typing import Optional, List
+from typing import Optional
 from pydantic import BaseModel, Field
-from .snowflake import Snowflake
 
 class CodePayload(BaseModel):
     code: str
 
-class RefreshPayload(BaseModel):
-    refresh_token:str
+class BotPayload(BaseModel):
+    session_token: str
+    guild_id: str
 
 class Session(BaseModel):
-    user_id: Snowflake
+    user_id: str
     username: str
     global_name: Optional[str] = Field(default=None)
     # avatar: str
