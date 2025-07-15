@@ -127,7 +127,7 @@ class AuthService:
         if response.status_code != 200:
             raise HTTPException(status_code=400, detail="Token exchange failed")
         
-        token_data = response.json
+        token_data = response.json()
         await self.save_tokens(user_id=user_id,token_data=token_data)
 
         return token_data
